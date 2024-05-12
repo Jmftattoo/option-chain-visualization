@@ -2,14 +2,17 @@ import os
 import subprocess
 import streamlit as st
 
-# Install private repository using credentials from Streamlit secrets
 def install_private_repo():
-    username = st.secrets["repo"]["username"]
-    password = st.secrets["repo"]["password"]
-    repo_url = f"https://{username}:{password}@github.com/Jmftattoo/convexlib.git"
-    subprocess.run(["pip", "install", f"git+{repo_url}#egg=convexlib"], check=True)
+    try:
+        username = st.secrets["repo"]["username"]
+        password = st.secrets["repo"]["password"]
+        repo_url = f"https://{username}:{password}@github.com/Jmftattoo/convexlib.git"
+        result = subprocess.run(["pip", "install", f"git+{repo_url}#egg=convexlib"], check=True, text=True, capture_output=True)
+    except subprocess.CalledProcessError as e:
+        error_message = f"Failed to install the repository. Command output:\n{e.stdout}\nError output:\n{e.stderr}"
+        st.error(error_message)
+        raise Exception(error_message)
 
-# Call the function to install the private repo
 install_private_repo()
 
 from SPX_NDX_VIX import fetch_and_plot_gamma_by_strike_plotly as fetch_spx_ndx
